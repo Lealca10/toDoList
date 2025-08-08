@@ -1,62 +1,86 @@
-let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
-    let editIndex = -1;
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+    let editIndex = null;
 
-    function salvarTarefa() {
-        let titulo = document.getElementById("titulo").value.trim();
-        let descricao = document.getElementById("descricao").value.trim();
+    const form = document.getElementById('formTarefa');
+    const listaTarefas = document.getElementById('listaTarefas');
+    const btnCancelar = document.getElementById('btnCancelar');
 
-        if (!titulo) return alert("Informe o título!");
-
-        if (editIndex === -1) {
-            tarefas.push({ titulo, descricao, concluida: false });
-        } else {
-            tarefas[editIndex] = { ...tarefas[editIndex], titulo, descricao };
-            editIndex = -1;
-        }
-
-        localStorage.setItem("tarefas", JSON.stringify(tarefas));
-        document.getElementById("titulo").value = "";
-        document.getElementById("descricao").value = "";
-        listarTarefas();
+    function salvarLocalStorage() {
+        localStorage.setItem('tarefas', JSON.stringify(tarefas));
     }
 
-    function listarTarefas() {
-        let lista = document.getElementById("lista");
-        lista.innerHTML = "";
-        tarefas.forEach((t, index) => {
-            let div = document.createElement("div");
-            div.className = "tarefa" + (t.concluida ? " tarefa-concluida" : "");
+    function renderizarTarefas() {
+        listaTarefas.innerHTML = '';
+        tarefas.forEach((tarefa, index) => {
+            const li = document.createElement('li');
 
-            div.innerHTML = `
-                <div>
-                    <input type="checkbox" ${t.concluida ? "checked" : ""} onchange="toggleConcluida(${index})">
-                    <span><strong>${t.titulo}</strong> - ${t.descricao}</span>
-                </div>
-                <div class="acoes">
-                    <button onclick="editarTarefa(${index})">✏️</button>
-                    <button onclick="excluirTarefa(${index})">🗑️</button>
-                </div>
-            `;
-            lista.appendChild(div);
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = tarefa.concluida;
+            checkbox.addEventListener('change', () => {
+                tarefa.concluida = !tarefa.concluida;
+                salvarLocalStorage();
+                renderizarTarefas();
+            });
+
+            const span = document.createElement('span');
+            span.classList.add('tarefa-texto');
+            if (tarefa.concluida) span.classList.add('concluida');
+            span.textContent = `${tarefa.titulo} - ${tarefa.descricao}`;
+
+            const acoes = document.createElement('div');
+            acoes.classList.add('acoes');
+
+            const btnEditar = document.createElement('button');
+            btnEditar.innerHTML = '✏️';
+            btnEditar.addEventListener('click', () => {
+                document.getElementById('titulo').value = tarefa.titulo;
+                document.getElementById('descricao').value = tarefa.descricao;
+                editIndex = index;
+                btnCancelar.style.display = 'inline-block';
+            });
+
+            const btnExcluir = document.createElement('button');
+            btnExcluir.innerHTML = '🗑️';
+            btnExcluir.addEventListener('click', () => {
+                tarefas.splice(index, 1);
+                salvarLocalStorage();
+                renderizarTarefas();
+            });
+
+            acoes.appendChild(btnEditar);
+            acoes.appendChild(btnExcluir);
+
+            li.appendChild(checkbox);
+            li.appendChild(span);
+            li.appendChild(acoes);
+
+            listaTarefas.appendChild(li);
         });
     }
 
-    function editarTarefa(index) {
-        document.getElementById("titulo").value = tarefas[index].titulo;
-        document.getElementById("descricao").value = tarefas[index].descricao;
-        editIndex = index;
-    }
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const titulo = document.getElementById('titulo').value.trim();
+        const descricao = document.getElementById('descricao').value.trim();
 
-    function excluirTarefa(index) {
-        tarefas.splice(index, 1);
-        localStorage.setItem("tarefas", JSON.stringify(tarefas));
-        listarTarefas();
-    }
+        if (editIndex !== null) {
+            tarefas[editIndex] = { titulo, descricao, concluida: tarefas[editIndex].concluida };
+            editIndex = null;
+            btnCancelar.style.display = 'none';
+        } else {
+            tarefas.push({ titulo, descricao, concluida: false });
+        }
 
-    function toggleConcluida(index) {
-        tarefas[index].concluida = !tarefas[index].concluida;
-        localStorage.setItem("tarefas", JSON.stringify(tarefas));
-        listarTarefas();
-    }
+        salvarLocalStorage();
+        renderizarTarefas();
+        form.reset();
+    });
 
-    listarTarefas();
+    btnCancelar.addEventListener('click', () => {
+        form.reset();
+        editIndex = null;
+        btnCancelar.style.display = 'none';
+    });
+
+    renderizarTarefas();
