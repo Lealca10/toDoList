@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"/>
+    <title>To do List</title>
+</head>
+<body>
+    <h1>Lista de Tarefas</h1>
+
+  <form id="task-form">
+    <input type="text" id="title" placeholder="Título da tarefa" required />
+    <textarea id="description" placeholder="Descrição da tarefa" rows="3" required></textarea>
+    <div class="btn">
+        <button type="submit">Salvar</button>
+        <button type="button" class="cancel" onclick="resetForm()">Cancelar</button>
+    </div>
+    
+  </form>
+
+  <div class="task-list" id="task-list"></div>
+
+</body>
+<script>script.js</script>
+</html>
