@@ -1,85 +1,62 @@
-let tasks = [];
-    let editingIndex = null;
+let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+    let editIndex = -1;
 
-    const form = document.getElementById("task-form");
-    const titleInput = document.getElementById("title");
-    const descInput = document.getElementById("description");
-    const taskList = document.getElementById("task-list");
+    function salvarTarefa() {
+        let titulo = document.getElementById("titulo").value.trim();
+        let descricao = document.getElementById("descricao").value.trim();
 
-    // Carregar tarefas do localStorage ao iniciar
-    window.addEventListener("load", () => {
-      const savedTasks = localStorage.getItem("tarefas");
-      if (savedTasks) {
-        tasks = JSON.parse(savedTasks);
-        renderTasks();
-      }
-    });
+        if (!titulo) return alert("Informe o título!");
 
-    // Salvar no localStorage
-    function saveToLocalStorage() {
-      localStorage.setItem("tarefas", JSON.stringify(tasks));
+        if (editIndex === -1) {
+            tarefas.push({ titulo, descricao, concluida: false });
+        } else {
+            tarefas[editIndex] = { ...tarefas[editIndex], titulo, descricao };
+            editIndex = -1;
+        }
+
+        localStorage.setItem("tarefas", JSON.stringify(tarefas));
+        document.getElementById("titulo").value = "";
+        document.getElementById("descricao").value = "";
+        listarTarefas();
     }
 
-    // Enviar formulário
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const title = titleInput.value.trim();
-      const description = descInput.value.trim();
+    function listarTarefas() {
+        let lista = document.getElementById("lista");
+        lista.innerHTML = "";
+        tarefas.forEach((t, index) => {
+            let div = document.createElement("div");
+            div.className = "tarefa" + (t.concluida ? " tarefa-concluida" : "");
 
-      if (!title || !description) return;
-
-      if (editingIndex !== null) {
-        tasks[editingIndex] = { title, description };
-        editingIndex = null;
-      } else {
-        tasks.push({ title, description });
-      }
-
-      saveToLocalStorage();
-      renderTasks();
-      resetForm();
-    });
-
-    // Renderizar tarefas
-    function renderTasks() {
-      taskList.innerHTML = "";
-      tasks.forEach((task, index) => {
-        const div = document.createElement("div");
-        div.className = "task-item";
-
-        const content = document.createElement("div");
-        content.className = "task-content";
-        content.innerHTML = `<div class="task-title">${task.title}</div><div class="task-desc">${task.description}</div>`;
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        actions.innerHTML = `
-          <button class="edit" onclick="editTask(${index})">Editar</button>
-          <button class="delete" onclick="deleteTask(${index})">Excluir</button>
-        `;
-
-        div.appendChild(content);
-        div.appendChild(actions);
-        taskList.appendChild(div);
-      });
+            div.innerHTML = `
+                <div>
+                    <input type="checkbox" ${t.concluida ? "checked" : ""} onchange="toggleConcluida(${index})">
+                    <span><strong>${t.titulo}</strong> - ${t.descricao}</span>
+                </div>
+                <div class="acoes">
+                    <button onclick="editarTarefa(${index})">✏️</button>
+                    <button onclick="excluirTarefa(${index})">🗑️</button>
+                </div>
+            `;
+            lista.appendChild(div);
+        });
     }
 
-    function editTask(index) {
-      const task = tasks[index];
-      titleInput.value = task.title;
-      descInput.value = task.description;
-      editingIndex = index;
+    function editarTarefa(index) {
+        document.getElementById("titulo").value = tarefas[index].titulo;
+        document.getElementById("descricao").value = tarefas[index].descricao;
+        editIndex = index;
     }
 
-    function deleteTask(index) {
-      if (confirm("Deseja excluir esta tarefa?")) {
-        tasks.splice(index, 1);
-        saveToLocalStorage();
-        renderTasks();
-      }
+    function excluirTarefa(index) {
+        tarefas.splice(index, 1);
+        localStorage.setItem("tarefas", JSON.stringify(tarefas));
+        listarTarefas();
     }
 
-    function resetForm() {
-      form.reset();
-      editingIndex = null;
+    function toggleConcluida(index) {
+        tarefas[index].concluida = !tarefas[index].concluida;
+        localStorage.setItem("tarefas", JSON.stringify(tarefas));
+        listarTarefas();
     }
+
+    listarTarefas();

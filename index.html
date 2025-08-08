@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"/>
-    <title>To do List</title>
+    <title>Lista de Tarefas</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Lista de Tarefas</h1>
+    <h2>📋 Lista de Tarefas</h2>
 
-  <form id="task-form">
-    <input type="text" id="title" placeholder="Título da tarefa" required />
-    <textarea id="description" placeholder="Descrição da tarefa" rows="3" required></textarea>
-    <div class="btn">
-        <button type="submit">Salvar</button>
-        <button type="button" class="cancel" onclick="resetForm()">Cancelar</button>
+<div class="form-container">
+    <div class="form-row">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo">
     </div>
-    
-  </form>
+    <div class="form-row">
+        <label for="descricao">Descrição:</label>
+        <input type="text" id="descricao">
+    </div>
+    <button class="btn btn-salvar" onclick="salvarTarefa()">Salvar</button>
+</div>
 
-  <div class="task-list" id="task-list"></div>
+<div class="lista-tarefas" id="lista"></div>
 
+    <script src="script.js"></script>
 </body>
-<script>script.js</script>
 </html>
